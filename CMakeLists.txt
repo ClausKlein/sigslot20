@@ -14,8 +14,9 @@ project(
 include(SigslotUtils)
 
 ### options
-option(SIGSLOT_COMPILE_EXAMPLES "Compile optional exemples" ON)
+option(SIGSLOT_COMPILE_EXAMPLES "Compile optional exemples" OFF)
 option(SIGSLOT_COMPILE_TESTS "Compile tests" ON)
+option(SIGSLOT_USE_BOOST_SIGNAL "Compile with Boost::signals2" ON)
 option(SIGSLOT_RUN_TESTS "Compile and run tests" OFF)
 option(SIGSLOT_REDUCE_COMPILE_TIME "Attempt at reducing code size and compilation time" OFF)
 
@@ -92,6 +93,10 @@ if(SIGSLOT_COMPILE_TESTS OR SIGSLOT_COMPILE_EXAMPLES)
         COMPONENTS system
         QUIET
     ) # test of boost bridge with smart pointers
+    if(TARGET Boost::headers AND SIGSLOT_USE_BOOST_SIGNAL)
+        target_link_libraries(sigslot INTERFACE Boost::headers)
+        target_compile_definitions(sigslot INTERFACE USE_BOOST)
+    endif()
     find_package(
         Qt5
         COMPONENTS Core Widgets Gui
