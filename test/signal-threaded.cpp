@@ -82,7 +82,7 @@ static void test_threaded_mix() {
     for (auto& t : threads) { t.join(); }
 
     std::cerr << "sum = " << sum << std::endl;  // 997331, 975576, 997340, 997540, 997171, 997440, ...
-    assert(sum > 900000LL);
+    assert(sum > 500000LL);
 }
 
 static void test_threaded_emission() {
