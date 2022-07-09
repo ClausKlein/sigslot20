@@ -8,7 +8,7 @@
 
 #if (__cpp_lib_latch) && defined(USE_BOOST)
 #    include <latch>
-#else
+#elif defined(USE_BOOST)
 #    warning "missing std::latch"
 #endif
 
