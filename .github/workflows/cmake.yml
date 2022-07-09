@@ -77,7 +77,7 @@ jobs:
         if: startsWith(matrix.config.name, 'MacOS')
         shell: bash
         run: |
-          # brew install llvm
+          brew install llvm
           export PATH=/usr/local/opt/llvm/bin/:${PATH}
           pwd && ls -la
           run-clang-tidy -p ${{github.workspace}}/build example/basic.cpp
