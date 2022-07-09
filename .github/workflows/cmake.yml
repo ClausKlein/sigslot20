@@ -2,17 +2,14 @@
 name: CMake
 
 on:
-  push:
-    branches:
-      - master
-      - develop
-
-    paths:
-      - '**.cpp'
-      - '**.hpp'
-      - '**/CMakeLists.txt'
-      - '**.cmake'
-      - '.github/workflows/**.yml'
+  - pull_request:
+  - push:
+      paths:
+        - '**.cpp'
+        - '**.hpp'
+        - '**/CMakeLists.txt'
+        - '**.cmake'
+        - '.github/workflows/**.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -33,7 +30,7 @@ jobs:
         config:
           - {name: "Windows", os: windows-latest, cc: "clang-cl", cxx: "clang-cl"}
           - {name: "Ubuntu gcc", os: ubuntu-latest, cc: "gcc-10", cxx: "g++-10"}
-          - {name: "Ubuntu clang", os: ubuntu-latest, cc: "clang-12", cxx: "clang++-12"}
+          - {name: "Ubuntu clang", os: ubuntu-latest, cc: "clang-13", cxx: "clang++-13"}
           - {name: "MacOS apple-clang", os: macos-latest, cc: "clang", cxx: "clang++"}
 
     steps:
