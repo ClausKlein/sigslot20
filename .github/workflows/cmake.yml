@@ -33,12 +33,12 @@ jobs:
         # We'll use this as our working directory for all subsequent commands
         run: cmake -E make_directory ${{github.workspace}}/build
 
-      - name: Install llvm-12 Ubuntu Host
+      - name: Install llvm-13 Ubuntu Host
         if: startsWith(matrix.config.name, 'Ubuntu')
         shell: bash
         run: |
           sudo apt-get install \
-            llvm-12 clang-12 libclang-12-dev clang-tidy-12
+            llvm-13 clang-13 libclang-13-dev clang-tidy-13
 
       - name: Configure cmake on Windows build host
         if: runner.os == 'Windows'
@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           pwd && ls -la
-          run-clang-tidy-12 -p ${{github.workspace}}/build example/basic.cpp
+          run-clang-tidy-13 -p ${{github.workspace}}/build example/basic.cpp
 
       - name: Run clang-tidy on MacOS build host
         if: startsWith(matrix.config.name, 'MacOS')
