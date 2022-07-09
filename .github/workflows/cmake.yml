@@ -1,15 +1,7 @@
 ---
 name: CMake
 
-on:
-  - pull_request:
-  - push:
-      paths:
-        - '**.cpp'
-        - '**.hpp'
-        - '**/CMakeLists.txt'
-        - '**.cmake'
-        - '.github/workflows/**.yml'
+on: [push, pull_request]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
