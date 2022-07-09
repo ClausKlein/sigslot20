@@ -1,19 +1,23 @@
 #include "test-common.h"
 
-#ifndef USE_BOOST
-#  include <sigslot/signal.hpp>
-typedef sigslot::signal<int> signal_t;
-#else
-#  include <boost/signals2.hpp>
-namespace sigslot = boost::signals2;
-typedef boost::signals2::signal<void(int)> signal_t;
-#  warning "using boost::signals2"
-#endif
-
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <iostream>
+#include <latch>
 #include <thread>
+
+#ifndef USE_BOOST
+#  include <sigslot/signal.hpp>
+
+typedef sigslot::signal<int> signal_t;
+#else
+#  include <boost/signals2.hpp>
+#  warning "using boost::signals2"
+
+namespace sigslot = boost::signals2;
+typedef boost::signals2::signal<void(int)> signal_t;
+#endif
 
 static std::atomic<std::int64_t> sum{0};
 
@@ -26,16 +30,20 @@ static void emit_many(signal_t& sig) {
   for (int i = 0; i < 10000; ++i) { sig(1); }
 }
 
-#ifndef USE_BOOST
 static void connect_emit(signal_t& sig) {
   for (int i = 0; i < 100; ++i) {
-    auto s = sig.connect_scoped(f);  // TODO(CK)
+
+#ifndef USE_BOOST
+    auto s = sig.connect_scoped(f);
+#else
+    boost::signals2::scoped_connection sc(sig.connect(f));
+#endif
+
     for (int j = 0; j < 100; ++j) { sig(1); }
   }
 }
-#endif
 
-static void connect_cross(signal_t& s1, signal_t& s2, std::atomic<int>& go) {
+static void connect_cross(signal_t& s1, signal_t& s2, std::latch& go) {
   auto cross = s1.connect([&](int i) {
     if (i & 1) {
       f(i);
@@ -44,13 +52,11 @@ static void connect_cross(signal_t& s1, signal_t& s2, std::atomic<int>& go) {
     }
   });
 
-  go++;
-  while (go != 3) { std::this_thread::yield(); }
+  go.arrive_and_wait();
 
-  for (int i = 0; i < 1000000; ++i) { s1(i); }
+  for (int i = 0; i < 100000; ++i) { s1(i); }
 }
 
-#ifndef USE_BOOST
 static void test_threaded_mix() {
   sum = 0;
 
@@ -60,8 +66,10 @@ static void test_threaded_mix() {
   for (auto& t : threads) { t = std::thread(connect_emit, std::ref(sig)); }
 
   for (auto& t : threads) { t.join(); }
+
+  std::cerr << "sum = " << sum << std::endl;  // 997331, 975576, 997340, 997540, 997171, 997440, ...
+  assert(sum > 900000LL);
 }
-#endif
 
 static void test_threaded_emission() {
   sum = 0;
@@ -74,7 +82,7 @@ static void test_threaded_emission() {
 
   for (auto& t : threads) { t.join(); }
 
-  assert(sum == 100000l);
+  assert(sum == 100000LL);
 }
 
 // test for deadlocks in cross emission situation
@@ -84,18 +92,17 @@ static void test_threaded_crossed() {
   signal_t sig1;
   signal_t sig2;
 
-  std::atomic<int> go{0};
+  std::latch go{3};
 
   std::thread t1(connect_cross, std::ref(sig1), std::ref(sig2), std::ref(go));
   std::thread t2(connect_cross, std::ref(sig2), std::ref(sig1), std::ref(go));
 
-  while (go != 2) { std::this_thread::yield(); }
-  go++;
+  go.arrive_and_wait();
 
   t1.join();
   t2.join();
 
-  assert(sum == std::int64_t(1000000000000ll));
+  assert(sum == 10000000000LL);
 }
 
 // test what happens when more than one thread attempt disconnection
@@ -151,11 +158,7 @@ static void test_threaded_misc() {
 
 int main() {
   test_threaded_emission();
-
-#ifndef USE_BOOST
   test_threaded_mix();
-#endif
-
   test_threaded_crossed();
   test_threaded_misc();
 
