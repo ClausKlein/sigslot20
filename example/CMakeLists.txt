@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16...3.22)
+cmake_minimum_required(VERSION 3.16...3.23)
 
 if(TEST_INSTALLED_VERSION)
     project(test_sigslot_conifg_package LANGUAGES CXX)

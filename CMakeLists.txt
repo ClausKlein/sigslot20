@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16...3.22)
+cmake_minimum_required(VERSION 3.16...3.23)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -14,7 +14,7 @@ project(
 include(SigslotUtils)
 
 ### options
-option(SIGSLOT_COMPILE_EXAMPLES "Compile optional exemples" OFF)
+option(SIGSLOT_COMPILE_EXAMPLES "Compile optional examples" ON)
 option(SIGSLOT_COMPILE_TESTS "Compile tests" ON)
 option(SIGSLOT_RUN_TESTS "Compile and run tests" OFF)
 option(SIGSLOT_REDUCE_COMPILE_TIME "Attempt at reducing code size and compilation time" OFF)
